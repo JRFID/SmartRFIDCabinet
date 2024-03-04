@@ -48,6 +48,8 @@ android {
 
 dependencies {
 
+    implementation(files("libs/jri-manager-core-1.0.2-release.aar", "libs/jri-manager-cb-c1-1.0.4-release.aar"))
+
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.activity:activity-compose:1.7.0")

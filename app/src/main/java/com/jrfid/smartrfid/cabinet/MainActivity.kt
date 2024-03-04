@@ -10,7 +10,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
+import com.jrfid.manager.cabinet.c1.JRIDevicesManager
+import com.jrfid.manager.core.model.FingerVeinDataModel
+import com.jrfid.manager.core.utils.LogUtils
 import com.jrfid.smartrfid.cabinet.ui.theme.SmartRFIDCabinetTheme
+import com.payne.reader.bean.send.MatchConfig
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

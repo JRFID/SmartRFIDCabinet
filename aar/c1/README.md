@@ -2,6 +2,22 @@
 
 本文是高值耗材柜 JRI-CB-C1（以下简称：耗材柜）SDK的标准的集成指南文档，用以说明耗材柜SDK的使用方法。默认读者已经熟悉Android Studio的基本使用方法，熟悉kotlin的基本语法，并且具有一定的Android编程基础。
 
+耗材柜SDK包含两个`aar`包，分别是位于[aar/core](/aar/core/)中的`jri-manager-core-*.aar`与位于[aar/c1](aar/c1/)中的`jri-manager-cb-c1-*.aar`。开发时请同时导入两个最新版`aar`包到你的项目中。
+
+## 更新记录
+
+### `jri-manager-core-*.aar`更新记录
+
+[点击查看详细更新记录](../aar/core/CHANGE-LOG.md)
+
+### `jri-manager-cb-c1-*.aar`更新记录
+
+#### v1.0.2 📅`2024.02.28`
+
+* 初始化导入版本
+
+[点击查看更多更新记录](CHANGE-LOG.md)
+
 ## 引入SDK
 
 ### 复制aar
@@ -37,11 +53,11 @@ lifecycleScope.launch(Dispatchers.IO) {
 }
 ```
 
-### 监听设备数据
+### 设备控制
 
 #### IC/ID模块
 
-监听IC/ID卡数据
+##### 监听IC/ID卡数据
 
 ```
 JRIDevicesManager.instance.addOnReceivedICCardDataCallback(object : ReceivedICCardDataCallback {
@@ -72,7 +88,7 @@ class ICCardPacketData{
 
 #### 条码模块
 
-监听条码扫描数据
+##### 监听条码扫描数据
 
 ```
 JRIDevicesManager.instance.addOnReceivedQrCodeDataCallback(object : ReceivedQrCodeDataCallback {
@@ -101,13 +117,13 @@ class QrCodePacketData{
 
 #### 柜门控制
 
-打开柜门
+##### 打开柜门
 
 ```
 JRIDevicesManager.instance.openTheDoor()
 ```
 
-柜门状态监听
+##### 柜门状态监听
 
 ```
 JRIDevicesManager.instance.addOnReceivedBasicDataCallback(object : ReceivedBasicDataCallback {
@@ -135,13 +151,14 @@ JRIDevicesManager.instance.addOnReceivedBasicDataCallback(object : ReceivedBasic
 
 #### 超高频模块控制
 
-开始盘存
+
+##### 开始盘存
 
 ```
 JRIDevicesManager.instance.startUhfInventory()
 ```
 
-获取盘存结果
+##### 获取盘存结果
 
 ```
 JRIDevicesManager.instance.addOnReceivedUhfInventoryDataCallback(object:ReceivedUhfInventoryDataCallback{
@@ -198,7 +215,7 @@ class UHFTagInfoModel {
 | fun getFreqText(): String | 盘存到标签的工作频率字符串，包含单位：MHz。 |
 | fun getEpcText(): String  | epc字符串 |
 
-工作频率参数对应表
+##### 工作频率参数对应表
 
 | 频率参数 | 对应频点 | 频率参数 | 对应频点 |
 | --------------- | --------------- | --------------- | --------------- |
@@ -234,15 +251,122 @@ class UHFTagInfoModel {
 | 29(0x1D)      | 913.00 MHz    | 59(0x3B)      | 928.00 MHz    |
 
 
+
 #### 指静脉模块控制
 
+##### 指静脉使用流程推荐
 
+###### 录入指静脉
 
+分3次获取用户指静脉特征值 -> 合成指静脉特征值模版 -> 保存特征值模版
 
+###### 验证指静脉
+
+导入特征值模版到算法库 -> 记录返回的ID并于用户绑定 -> 获取指静脉特征值 -> 验证特征值是否存在
+
+##### 是否放置手指
+
+调用后立即返回`Boolean`类型结果，`true`表示有手指放置到指静脉模块上，反之则没有。
+
+```
+val result:Boolean = JRIDevicesManager.instance.checkFingerIn()
+```
+
+##### 是否移开手指
+
+调用后立即返回`Boolean`类型结果，`true`表示有没有手指放置到指静脉模块上，反之则有。
+
+```
+val result:Boolean = JRIDevicesManager.instance.checkFingerOut()
+```
+
+##### 等待手指放置
+
+该操作为阻塞操作需放置到协程中调用，调用后会一直阻塞程序，检测到手指放置到指静脉模块上后会释放。
+
+```
+lifecycleScope.launch {
+    JRIDevicesManager.instance.waitingFingerIn()
+ }
+```
+
+##### 等待手指移开
+
+该操作为阻塞操作需放置到协程中调用，调用后会一直阻塞程序，检测到手指移开后会释放。
+
+```
+lifecycleScope.launch {
+    JRIDevicesManager.instance.waitingFingerOut()
+}
+```
+
+##### 获取指静脉特征值
+
+实时获取，只有当手指正确放置到指静脉模块上时调用后会立即返回`String`类型的指静脉特征值，其他情况下返回`null`。
+
+```
+val result:String? = JRIDevicesManager.instance.getFingerVeinChara()
+```
+
+阻塞获取，需放置到协程中调用，调用后会一直阻塞程序，直到获取到指静脉特征值后返回，如果设置的超时时间内未获取到指静脉特征值则返回`null`。
+
+```
+lifecycleScope.launch {
+    val result: String? = JRIDevicesManager.instance.getFingerVeinChara(timeoutMillis = 1000)
+}
+```
+
+##### 获取指静脉特征值模板
+
+将分3次获取的指静脉特征值融合成一个特征值模版，融合成功返回`String`类型的特征值模版，融合失败则返回`null`。
+
+```
+val result: String? = JRIDevicesManager.instance.createFingerVeinTemp("", "", "")
+```
+
+##### 持续获取指静脉特征值:boom:
+
+通过`kotlin`中`Flow`的形式持续获取指静脉特征值，可以根据返回的`MODEL_TYPE`反馈给用户做相应的操作。
+
+```
+lifecycleScope.launch {
+    JRIDevicesManager.instance.getFingerVeinCharaFlow()
+        .flowOn(Dispatchers.IO)
+        .collect {
+            if (it.type == FingerVeinDataModel.MODEL_TYPE_FINGER_IN) {
+                LogUtils.d("请放置手指")
+            } else if (it.type == FingerVeinDataModel.MODEL_TYPE_FINGER_OUT) {
+                LogUtils.d("请移开手指")
+            } else if (it.type == FingerVeinDataModel.MODEL_TYPE_CHARA_DATA) {
+                LogUtils.d("指静脉特征值为：${it.data}")
+            }
+        }
+}
+```
+
+##### 持续获取指静脉特征值模版:boom:
+
+通过`kotlin`中`Flow`的形式持续获取指静脉特征值，可以根据返回的`MODEL_TYPE`反馈给用户做相应的操作。
+
+```
+lifecycleScope.launch {
+    JRIDevicesManager.instance.getFingerVeinTempFlow()
+        .flowOn(Dispatchers.IO)
+        .collect {
+            if (it.type == FingerVeinDataModel.MODEL_TYPE_FINGER_IN) {
+                 LogUtils.d("请放置手指")
+            } else if (it.type == FingerVeinDataModel.MODEL_TYPE_FINGER_OUT) {
+                 LogUtils.d("请移开手指")
+            } else if (it.type == FingerVeinDataModel.MODEL_TYPE_TEMP_DATA) {
+                 LogUtils.d("指静脉特征值模版为：${it.data}")
+            }
+         }
+}
+```
 
 #### 空气质量模块
 
-监听空气质量数据
+##### 监听空气质量数据
 
 ```
 JRIDevicesManager.instance.addOnReceivedAirQualityDataCallback(
@@ -276,7 +400,7 @@ class AirQualityPacketData(val byteArray: ByteArray) {
 
 #### 消毒模块控制
 
-开启消毒
+##### 开启消毒
 
 * 协程方式调用，直接返回`Boolean`类型结果，返回`true`代表开启成功，其它结果表示开启失败。
 
@@ -304,7 +428,7 @@ JRIDevicesManager.instance.openUVSterilization(
    })
 ```
 
-关闭消毒
+##### 关闭消毒
 
 * 协程方式调用，直接返回`Boolean`类型结果，返回`true`代表关闭成功，其它结果表示关闭失败。
 
