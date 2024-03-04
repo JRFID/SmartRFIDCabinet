@@ -2,13 +2,13 @@
 
 本文是高值耗材柜 JRI-CB-C1（以下简称：耗材柜）SDK的标准的集成指南文档，用以说明耗材柜SDK的使用方法。默认读者已经熟悉Android Studio的基本使用方法，熟悉kotlin的基本语法，并且具有一定的Android编程基础。
 
-耗材柜SDK包含两个`aar`包，分别是位于[aar/core](/aar/core/)中的`jri-manager-core-*.aar`与位于[aar/c1](aar/c1/)中的`jri-manager-cb-c1-*.aar`。开发时请同时导入两个最新版`aar`包到你的项目中。
+耗材柜SDK包含两个`aar`包，分别是位于[aar/core](/aar/core/)中的`jri-manager-core-*.aar`与位于[aar/c1](/aar/c1/)中的`jri-manager-cb-c1-*.aar`。开发时请同时导入两个最新版`aar`包到你的项目中。
 
 ## 更新记录
 
 ### `jri-manager-core-*.aar`更新记录
 
-[点击查看详细更新记录](../aar/core/CHANGE-LOG.md)
+[点击查看详细更新记录](../core/CHANGE-LOG.md)
 
 ### `jri-manager-cb-c1-*.aar`更新记录
 
@@ -151,7 +151,6 @@ JRIDevicesManager.instance.addOnReceivedBasicDataCallback(object : ReceivedBasic
 
 #### 超高频模块控制
 
-
 ##### 开始盘存
 
 ```
@@ -249,8 +248,6 @@ class UHFTagInfoModel {
 | 27(0x1B)      | 912.00 MHz    | 57(0x39)      | 927.00 MHz    |
 | 28(0x1C)      | 912.50 MHz    | 58(0x3A)      | 927.50 MHz    |
 | 29(0x1D)      | 913.00 MHz    | 59(0x3B)      | 928.00 MHz    |
-
-
 
 #### 指静脉模块控制
 
