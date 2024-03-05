@@ -1,5 +1,7 @@
 # 高值耗材柜 JRI-CB-C1 SDK使用说明
 
+### [📖中文文档](README.md) | 📖English Document
+
 本文是高值耗材柜 JRI-CB-C1（以下简称：耗材柜）SDK的标准的集成指南文档，用以说明耗材柜SDK的使用方法。默认读者已经熟悉Android Studio的基本使用方法，熟悉kotlin的基本语法，并且具有一定的Android编程基础。
 
 耗材柜SDK包含两个`aar`包，分别是位于[aar/core](/aar/core/)中的`jri-manager-core-*.aar`与位于[aar/c1](/aar/c1/)中的`jri-manager-cb-c1-*.aar`。开发时请同时导入两个最新版`aar`包到你的项目中。
